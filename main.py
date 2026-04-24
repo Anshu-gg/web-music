@@ -72,34 +72,38 @@ def login_required(func):
 
 @app.before_serving
 async def setup():
-    lang_codes = ["en"] + [
-        lang for lang in os.listdir(os.path.join(ROOT_DIR, "translations"))
-        if not lang.startswith(".")
-    ]
-    for lang_code in lang_codes:
-        LANGUAGES[lang_code] = {"name": Locale.parse(lang_code).get_display_name(lang_code).capitalize()}
+    try:
+        lang_codes = ["en"] + [
+            lang for lang in os.listdir(os.path.join(ROOT_DIR, "translations"))
+            if not lang.startswith(".")
+        ]
+        for lang_code in lang_codes:
+            LANGUAGES[lang_code] = {"name": Locale.parse(lang_code).get_display_name(lang_code).capitalize()}
 
-    process_js_files()
-    compile_scss()
-    await download_geoip_db()
+        process_js_files()
+        compile_scss()
+        await download_geoip_db()
 
-    # Initialize Lavalink Node
-    node = await NodePool.create_node(
-        host="193.226.78.187",
-        port=4036,
-        password="titli",
-        identifier="love",
-        user_id="1234567890", # Use numeric user_id for Lavalink compatibility
-        secure=False
-    )
-    # Wait for node to be connected (max 10 seconds)
-    for i in range(10):
-        if node.is_connected:
-            LOGGER.info(f"Lavalink node connected after {i} seconds.")
-            break
-        await asyncio.sleep(1)
-    else:
-        LOGGER.warning("Lavalink node failed to connect within 10 seconds.")
+        # Initialize Lavalink Node
+        node = await NodePool.create_node(
+            host="193.226.78.187",
+            port=4036,
+            password="titli",
+            identifier="love",
+            user_id="1234567890", # Use numeric user_id for Lavalink compatibility
+            secure=False
+        )
+        # Wait for node to be connected (max 10 seconds)
+        for i in range(10):
+            if node.is_connected:
+                LOGGER.info(f"Lavalink node connected after {i} seconds.")
+                break
+            await asyncio.sleep(1)
+        else:
+            LOGGER.warning("Lavalink node failed to connect within 10 seconds.")
+    except Exception as e:
+        LOGGER.error(f"Error during initialization setup: {e}")
+        # On Render, we might want to continue even if GeoIP fails
 
 
 @app.route("/health", methods=["GET"])
