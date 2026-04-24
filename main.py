@@ -146,5 +146,10 @@ if __name__ == "__main__":
     # update.check_version(with_msg=True)
     setup_logging(SETTINGS.logging)
     config = Config()
-    config.bind = [f"{SETTINGS.host}:{SETTINGS.port}"]
+    
+    # Use environment variables for Render deployment compatibility
+    host = os.environ.get("HOST", SETTINGS.host)
+    port = int(os.environ.get("PORT", SETTINGS.port))
+    
+    config.bind = [f"{host}:{port}"]
     asyncio.run(serve(app, config))
