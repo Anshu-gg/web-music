@@ -1,0 +1,21 @@
+{
+  "host": "0.0.0.0",
+  "port": 5000,
+  "password": "youshallnotpass",
+  "client_id": "1488277481248260366",
+  "client_secret_id": "z6yTl_05XG_ZLRqkZsERUGL_0JcHAApx",
+  "secret_key": "titli_music_secret_session_key",
+  "redirect_url": "http://80.225.222.154:5000/callback",
+  "logging": {
+    "file": {
+      "path": "./logs",
+      "enable": true
+    },
+    "level": {
+      "dashboard": "INFO",
+      "Titli": "INFO",
+      "voicelink": "INFO"
+    },
+    "max_history": 30
+  }
+}

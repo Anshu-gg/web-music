@@ -1,0 +1,27 @@
+{% block menu %}
+<div class="menu-container">
+    <div class="scrollbar">
+        <div class="top">
+            <div class="section">
+                <div class="menu-btn active" id="menu-main-page">
+                    <span class="material-symbols-outlined">home</span>
+                    <p>{{ _("Home") }}</p>
+                </div>
+
+                <div class="menu-btn" id="menu-explore-page">
+                    <span class="material-symbols-outlined">explore</span>
+                    <p>{{ _("Explore") }}</p>
+                </div>
+            </div>
+            <div class="bar"></div>
+            <div class="section">
+                <div class="menu-btn center" id="menu-create-playlist">
+                    <span class="material-symbols-outlined">add</span>
+                    <p class="header-text">{{ _("Create Playlist") }}</p>
+                </div>
+                <div id="playlist-selector"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
