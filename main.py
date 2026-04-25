@@ -73,37 +73,62 @@ def login_required(func):
 @app.before_serving
 async def setup():
     try:
-        lang_codes = ["en"] + [
-            lang for lang in os.listdir(os.path.join(ROOT_DIR, "translations"))
-            if not lang.startswith(".")
-        ]
-        for lang_code in lang_codes:
-            LANGUAGES[lang_code] = {"name": Locale.parse(lang_code).get_display_name(lang_code).capitalize()}
+        # Initialize MongoDB first as it's critical
+        mongo_uri = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
+        try:
+            from voicelink.mongodb import MongoDBHandler
+            await MongoDBHandler.init(uri=mongo_uri, db_name="titli_music")
+            LOGGER.info("MongoDB initialized successfully.")
+        except Exception as e:
+            LOGGER.error(f"Failed to initialize MongoDB: {e}")
+            # We continue for now, but most features will fail
 
-        process_js_files()
-        compile_scss()
+        lang_codes = ["en"]
+        translations_path = os.path.join(ROOT_DIR, "translations")
+        if os.path.exists(translations_path):
+            lang_codes += [
+                lang for lang in os.listdir(translations_path)
+                if not lang.startswith(".")
+            ]
+        
+        for lang_code in lang_codes:
+            try:
+                LANGUAGES[lang_code] = {"name": Locale.parse(lang_code).get_display_name(lang_code).capitalize()}
+            except:
+                LANGUAGES[lang_code] = {"name": lang_code}
+
+        # Static files processing
+        try:
+            process_js_files()
+            compile_scss()
+        except Exception as e:
+            LOGGER.error(f"Error processing static files: {e}")
+
         await download_geoip_db()
 
         # Initialize Lavalink Node
-        node = await NodePool.create_node(
-            host="193.226.78.187",
-            port=4036,
-            password="titli",
-            identifier="love",
-            user_id="1234567890", # Use numeric user_id for Lavalink compatibility
-            secure=False
-        )
-        # Wait for node to be connected (max 10 seconds)
-        for i in range(10):
-            if node.is_connected:
-                LOGGER.info(f"Lavalink node connected after {i} seconds.")
-                break
-            await asyncio.sleep(1)
-        else:
-            LOGGER.warning("Lavalink node failed to connect within 10 seconds.")
+        try:
+            node = await NodePool.create_node(
+                host="193.226.78.187",
+                port=4036,
+                password="titli",
+                identifier="love",
+                user_id="1234567890",
+                secure=False
+            )
+            # Wait for node to be connected (max 5 seconds for faster startup)
+            for i in range(5):
+                if node.is_connected:
+                    LOGGER.info(f"Lavalink node connected after {i} seconds.")
+                    break
+                await asyncio.sleep(1)
+            else:
+                LOGGER.warning("Lavalink node failed to connect within 5 seconds.")
+        except Exception as e:
+            LOGGER.error(f"Error creating Lavalink node: {e}")
+
     except Exception as e:
-        LOGGER.error(f"Error during initialization setup: {e}")
-        # On Render, we might want to continue even if GeoIP fails
+        LOGGER.error(f"Critical error during initialization setup: {e}")
 
 
 @app.route("/health", methods=["GET"])
