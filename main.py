@@ -73,23 +73,32 @@ def login_required(func):
 @app.before_serving
 async def setup():
     try:
-        # Initialize MongoDB first as it's critical
+        # Initialize MongoDB with a timeout to prevent hanging
         mongo_uri = os.environ.get("MONGO_URI", "mongodb://localhost:27017")
         try:
             from voicelink.mongodb import MongoDBHandler
-            await MongoDBHandler.init(uri=mongo_uri, db_name="titli_music")
+            # Use a shorter server selection timeout for faster failure
+            await asyncio.wait_for(
+                MongoDBHandler.init(uri=mongo_uri, db_name="titli_music"),
+                timeout=10.0
+            )
             LOGGER.info("MongoDB initialized successfully.")
+        except asyncio.TimeoutError:
+            LOGGER.error("MongoDB initialization timed out after 10 seconds.")
         except Exception as e:
             LOGGER.error(f"Failed to initialize MongoDB: {e}")
-            # We continue for now, but most features will fail
 
+        # Basic setup that must be sync/fast
         lang_codes = ["en"]
         translations_path = os.path.join(ROOT_DIR, "translations")
         if os.path.exists(translations_path):
-            lang_codes += [
-                lang for lang in os.listdir(translations_path)
-                if not lang.startswith(".")
-            ]
+            try:
+                lang_codes += [
+                    lang for lang in os.listdir(translations_path)
+                    if not lang.startswith(".")
+                ]
+            except Exception as e:
+                LOGGER.error(f"Error listing translations: {e}")
         
         for lang_code in lang_codes:
             try:
@@ -97,14 +106,28 @@ async def setup():
             except:
                 LANGUAGES[lang_code] = {"name": lang_code}
 
-        # Static files processing
-        try:
-            process_js_files()
-            compile_scss()
-        except Exception as e:
-            LOGGER.error(f"Error processing static files: {e}")
+        # Run heavy tasks in background to avoid blocking port binding
+        asyncio.create_task(background_setup())
 
-        await download_geoip_db()
+    except Exception as e:
+        LOGGER.error(f"Critical error during initialization setup: {e}")
+
+async def background_setup():
+    """Heavy initialization tasks that can run after port binding."""
+    try:
+        # Static files processing in a thread
+        try:
+            await asyncio.to_thread(process_js_files)
+            await asyncio.to_thread(compile_scss)
+            LOGGER.info("Static files processed in background.")
+        except Exception as e:
+            LOGGER.error(f"Error processing static files in background: {e}")
+
+        # GeoIP download
+        try:
+            await download_geoip_db()
+        except Exception as e:
+            LOGGER.error(f"Error downloading GeoIP: {e}")
 
         # Initialize Lavalink Node
         try:
@@ -116,19 +139,16 @@ async def setup():
                 user_id="1234567890",
                 secure=False
             )
-            # Wait for node to be connected (max 5 seconds for faster startup)
-            for i in range(5):
+            # Wait for node to be connected
+            for i in range(10):
                 if node.is_connected:
-                    LOGGER.info(f"Lavalink node connected after {i} seconds.")
+                    LOGGER.info(f"Lavalink node connected in background after {i} seconds.")
                     break
                 await asyncio.sleep(1)
-            else:
-                LOGGER.warning("Lavalink node failed to connect within 5 seconds.")
         except Exception as e:
-            LOGGER.error(f"Error creating Lavalink node: {e}")
-
+            LOGGER.error(f"Error creating Lavalink node in background: {e}")
     except Exception as e:
-        LOGGER.error(f"Critical error during initialization setup: {e}")
+        LOGGER.error(f"Error in background setup: {e}")
 
 
 @app.route("/health", methods=["GET"])
