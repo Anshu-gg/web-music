@@ -23,8 +23,13 @@ SOFTWARE.
 
 from __future__ import annotations
 
-from .pool import NodePool
-from discord.ext.commands import Bot
+try:
+    import discord
+    from discord.ext.commands import Bot
+except ImportError:
+    from . import mocks as discord
+    from .mocks.ext.commands import Bot
+
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

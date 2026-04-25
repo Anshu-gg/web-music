@@ -24,12 +24,12 @@ SOFTWARE.
 import random
 import time
 import socket
-import discord
-
-from itertools import zip_longest
-from typing import Dict, Optional, Union
-from timeit import default_timer as timer
-from discord.ext import commands
+try:
+    import discord
+    from discord.ext import commands
+except ImportError:
+    from . import mocks as discord
+    from .mocks import ext as commands
 
 from .mongodb import MongoDBHandler
 from .language import LangHandler
@@ -211,10 +211,10 @@ class Ping:
         return s_runtime
 
 class TempCtx():
-    def __init__(self, author: discord.Member, channel: discord.VoiceChannel) -> None:
-        self.author: discord.Member = author
-        self.channel: discord.VoiceChannel = channel
-        self.guild: discord.Guild = channel.guild
+    def __init__(self, author: Any, channel: Any) -> None:
+        self.author: Any = author
+        self.channel: Any = channel
+        self.guild: Any = channel.guild
 
 def format_to_ms(time_str: str) -> int:
     """

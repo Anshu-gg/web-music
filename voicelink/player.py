@@ -1,26 +1,19 @@
 from __future__ import annotations
 
-import discord
-import time, logging, asyncio
-
-from math import ceil
-from random import shuffle, choice
-from typing import Any, Dict, List, Optional, Union, Tuple, TYPE_CHECKING
-
-from discord import (
-    Client,
-    Guild,
-    VoiceChannel,
-    VoiceProtocol,
-    Member,
-    Message,
-    PartialMessage,
-    Interaction,
-    errors,
-    ChannelType
-)
-
-from discord.ext import commands
+try:
+    import discord
+    from discord import (
+        Client, Guild, VoiceChannel, VoiceProtocol, Member,
+        Message, PartialMessage, Interaction, errors, ChannelType
+    )
+    from discord.ext import commands
+except ImportError:
+    from . import mocks as discord
+    from .mocks import (
+        Mock as Client, Mock as Guild, Mock as VoiceChannel, Mock as VoiceProtocol, Mock as Member,
+        Mock as Message, Mock as PartialMessage, Mock as Interaction, Mock as errors, Mock as ChannelType
+    )
+    from .mocks import ext as commands
 
 from . import events
 from .config import Config
