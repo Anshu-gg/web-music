@@ -31,6 +31,10 @@ except ImportError:
     from . import mocks as discord
     from .mocks import commands
 
+from itertools import zip_longest
+from typing import Dict, Optional, Union, Any
+from timeit import default_timer as timer
+
 from .mongodb import MongoDBHandler
 from .language import LangHandler
 
