@@ -3,7 +3,7 @@ import asyncio
 import logging
 import sass
 import os
-import objects
+
 
 from logging.handlers import TimedRotatingFileHandler
 
@@ -105,6 +105,7 @@ def get_locale() -> str:
     if not language:
         token = session.get("discord_token")
         if token:
+            import objects
             user = objects.UserPool.get(token=token)
             language = user.language_code if user else None
 
