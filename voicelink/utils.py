@@ -29,7 +29,7 @@ try:
     from discord.ext import commands
 except ImportError:
     from . import mocks as discord
-    from .mocks import ext as commands
+    from .mocks import commands
 
 from .mongodb import MongoDBHandler
 from .language import LangHandler

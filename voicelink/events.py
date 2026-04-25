@@ -28,7 +28,7 @@ try:
     from discord.ext.commands import Bot
 except ImportError:
     from . import mocks as discord
-    from .mocks.ext.commands import Bot
+    from .mocks import Bot
 
 from typing import TYPE_CHECKING
 

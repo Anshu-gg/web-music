@@ -8,23 +8,16 @@ class Mock:
     def __call__(self, *args, **kwargs):
         return Mock()
 
-class Embed(Mock):
-    pass
-
-class Interaction(Mock):
-    pass
-
-class Message(Mock):
-    pass
-
-class Member(Mock):
-    pass
-
-class VoiceChannel(Mock):
-    pass
-
-class Guild(Mock):
-    pass
+class Embed(Mock): pass
+class Interaction(Mock): pass
+class Message(Mock): pass
+class Member(Mock): pass
+class VoiceChannel(Mock): pass
+class Guild(Mock): pass
+class Bot(Mock): pass
+class Context(Bot): pass
+class View(Mock): pass
+class ChannelType(Mock): pass
 
 class MISSING:
     pass
@@ -32,10 +25,12 @@ class MISSING:
 class utils:
     MISSING = MISSING()
 
+class commands:
+    Context = Context
+    Bot = Bot
+
 class ext:
-    class commands:
-        Context = Mock
-        Bot = Mock
+    commands = commands
 
 class ui:
-    View = Mock
+    View = View

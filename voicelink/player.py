@@ -10,10 +10,10 @@ try:
 except ImportError:
     from . import mocks as discord
     from .mocks import (
-        Mock as Client, Mock as Guild, Mock as VoiceChannel, Mock as VoiceProtocol, Mock as Member,
-        Mock as Message, Mock as PartialMessage, Mock as Interaction, Mock as errors, Mock as ChannelType
+        Bot as Client, Guild, VoiceChannel, Mock as VoiceProtocol, Member,
+        Message, Mock as PartialMessage, Interaction, Mock as errors, ChannelType,
+        commands
     )
-    from .mocks import ext as commands
 
 from . import events
 from .config import Config
