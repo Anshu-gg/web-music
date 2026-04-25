@@ -397,11 +397,15 @@ class Settings:
         self.settings_file = settings_file
         self.settings = self.load()
 
-        self.host: str = self.get_setting("host") or os.getenv("HOST", "0.0.0.0")
-        self.port: int = self.get_setting("port") or os.getenv("PORT", 5000)
-        self.secret_key: str = self.get_setting("secret_key") or os.getenv("SECRET_KEY", "standalone_music_secret")
+        self.host: str = os.getenv("HOST", self.get_setting("host", "0.0.0.0"))
+        self.port: int = int(os.getenv("PORT", self.get_setting("port", 5000)))
+        self.secret_key: str = os.getenv("SECRET_KEY", self.get_setting("secret_key", "standalone_music_secret"))
 
-        self.logging: Dict[str, Any] = self.get_setting("logging")
+        self.logging: Dict[str, Any] = self.get_setting("logging", {
+            "file": {"enable": False, "path": "./logs"},
+            "level": {"dashboard": "INFO", "Titli": "INFO", "voicelink": "INFO"},
+            "max-history": 30
+        })
 
     def get_setting(self, key: str, default: Optional[str] = None) -> Optional[str]:
         return self.settings.get(key, default)

@@ -74,9 +74,12 @@ class ColoredFormatter(logging.Formatter):
 
 def setup_logging(log_settings: Dict[str, Any]):
     root_logger = logging.getLogger()
+    if not log_settings:
+        log_settings = {}
 
-    if (LOG_FILE := log_settings.get("file", {})).get("enable", True):
-        log_path = os.path.abspath(LOG_FILE.get("path", "./logs"))
+    log_file_settings = log_settings.get("file", {})
+    if log_file_settings.get("enable", False):
+        log_path = os.path.abspath(log_file_settings.get("path", "./logs"))
         if not os.path.exists(log_path):
             os.makedirs(log_path)
 
